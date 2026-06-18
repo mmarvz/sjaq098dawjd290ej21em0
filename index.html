@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Investment Allocation Tracker</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    padding: 20px;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: auto;
+    background: #1e293b;
+    padding: 20px;
+    border-radius: 12px;
+  }
+
+  h2 {
+    text-align: center;
+  }
+
+  input, select, button {
+    width: 30%;
+    padding: 6px;
+    margin-top: 5px;
+    border-radius: 8px;
+    border: none;
+    font-size: 14px;
+  }
+
+  button {
+    background: #22c55e;
+    color: white;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  button:hover {
+    background: #16a34a;
+  }
+
+  table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    padding: 8px;
+    border-bottom: 1px solid #334155;
+    text-align: center;
+  }
+
+  th {
+    background: #0b1220;
+  }
+
+  .delete-btn {
+    background: #ef4444;
+    padding: 4px 8px;
+    border-radius: 6px;
+    color: white;
+    border: none;
+  }
+
+  /* 📊 CHART LAYOUT */
+  .chart-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+    margin-top: 20px;
+  }
+
+  /* 🔲 PERFECT SQUARE BOX */
+  .chart-box {
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    border-radius: 10px;
+    padding: 5px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .chart-box canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* 📱 MOBILE */
+  @media (max-width: 600px) {
+    .chart-row {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>Investment Allocation Tracker</h2>
+
+  <!-- CHARTS -->
+  <div class="chart-row">
+    <div class="chart-box">
+      <canvas id="lineChart"></canvas>
+    </div>
+
+    <div class="chart-box">
+      <canvas id="pieChart"></canvas>
+    </div>
+  </div>
+
+  <!-- INPUTS -->
+  <input type="date" id="dateInput">
+  <input type="number" id="amountInput" placeholder="Amount (₱)">
+
+  <select id="accountInput">
+    <option>MP2 - Acc. 1</option>
+    <option>MP2 - Acc. 2</option>
+    <option>MP2 - Acc. 3</option>
+    <option>MP2 - Acc. 4</option>
+    <option>MP2 - Acc. 5</option>
+    <option>GS - TOPA1</option>
+    <option>GS - TOPA2</option>
+  </select>
+
+  <button onclick="addEntry()">Add Entry</button>
+
+  <!-- FILTERS -->
+  <h3>Filters</h3>
+
+  <input type="date" id="fromDate" onchange="renderTable()">
+  <input type="date" id="toDate" onchange="renderTable()">
+
+  <select id="filterAccount" onchange="renderTable()">
+    <option value="">All Accounts</option>
+    <option>MP2 - Acc. 1</option>
+    <option>MP2 - Acc. 2</option>
+    <option>MP2 - Acc. 3</option>
+    <option>MP2 - Acc. 4</option>
+    <option>MP2 - Acc. 5</option>
+    <option>GS - TOPA1</option>
+    <option>GS - TOPA2</option>
+  </select>
+
+  <button onclick="clearFilters()">Clear Filters</button>
+
+  <!-- TABLE -->
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Account</th>
+        <th>Amount</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+
+<script>
+let data = JSON.parse(localStorage.getItem("mp2Data")) || [];
+
+let lineChart;
+let pieChart;
+
+/* ADD */
+function addEntry() {
+  const date = document.getElementById("dateInput").value;
+  const account = document.getElementById("accountInput").value;
+  const amount = parseFloat(document.getElementById("amountInput").value);
+
+  if (!date || !amount) return alert("Fill date and amount");
+
+  data.push({ date, account, amount });
+  save();
+}
+
+/* SAVE */
+function save() {
+  localStorage.setItem("mp2Data", JSON.stringify(data));
+  renderTable();
+  updateCharts();
+}
+
+/* TABLE */
+function renderTable() {
+  const tbody = document.getElementById("tableBody");
+  tbody.innerHTML = "";
+
+  const acc = document.getElementById("filterAccount").value;
+  const from = document.getElementById("fromDate").value;
+  const to = document.getElementById("toDate").value;
+
+  const filtered = data.filter(d =>
+    (!acc || d.account === acc) &&
+    (!from || d.date >= from) &&
+    (!to || d.date <= to)
+  );
+
+  filtered.forEach((d, i) => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${d.date}</td>
+        <td>${d.account}</td>
+        <td>₱${d.amount.toLocaleString()}</td>
+        <td><button class="delete-btn" onclick="del(${i})">X</button></td>
+      </tr>
+    `;
+  });
+}
+
+/* DELETE */
+function del(i) {
+  data.splice(i, 1);
+  save();
+}
+
+/* PROJECTION */
+function buildProjection() {
+  let yearly = {};
+  let base = 0;
+
+  data.forEach(d => {
+    const year = new Date(d.date).getFullYear();
+    yearly[year] = (yearly[year] || 0) + d.amount;
+  });
+
+  Object.values(yearly).forEach(v => base += v);
+
+  let labels = [];
+  let values = [];
+
+  for (let i = 0; i < 5; i++) {
+    base *= 1.04;
+    labels.push((new Date().getFullYear() + i).toString());
+    values.push(base);
+  }
+
+  return { labels, values };
+}
+
+/* PIE */
+function buildPie() {
+  let map = {};
+
+  data.forEach(d => {
+    map[d.account] = (map[d.account] || 0) + d.amount;
+  });
+
+  return {
+    labels: Object.keys(map),
+    values: Object.values(map)
+  };
+}
+
+/* CHARTS */
+function updateCharts() {
+  const line = buildProjection();
+  const pie = buildPie();
+
+  if (lineChart) lineChart.destroy();
+  if (pieChart) pieChart.destroy();
+
+  lineChart = new Chart(document.getElementById("lineChart"), {
+    type: "line",
+    data: {
+      labels: line.labels,
+      datasets: [{
+        label: "5-Year Projected Growth",
+        data: line.values,
+        borderColor: "#22c55e",
+        fill: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false
+    }
+  });
+
+  pieChart = new Chart(document.getElementById("pieChart"), {
+    type: "pie",
+    data: {
+      labels: pie.labels,
+      datasets: [{
+        data: pie.values
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false
+    }
+  });
+}
+
+/* FILTER RESET */
+function clearFilters() {
+  document.getElementById("filterAccount").value = "";
+  document.getElementById("fromDate").value = "";
+  document.getElementById("toDate").value = "";
+  renderTable();
+}
+
+renderTable();
+updateCharts();
+</script>
+
+</body>
+</html>
