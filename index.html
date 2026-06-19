@@ -2,50 +2,184 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
-<meta name="description" content="M.System Solutions">
-<meta name="keywords" content="management">
-<meta name="author" content="M.System Solutions">
-<meta name="robots" content="noindex, nofollow">
-  
-<title>Investment Allocation Tracker</title>
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<title>M|Systems Solutions</title>
 
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #0f172a;
-    color: #e2e8f0;
-    padding: 20px;
-  }
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
 
-  .container {
-    max-width: 900px;
-    margin: auto;
-    background: #1e293b;
-    padding: 20px;
-    border-radius: 12px;
-  }
+body{
+    font-family:Arial,sans-serif;
+    min-height:100vh;
+    padding:20px;
+
+    /* Wallpaper */
+    background-image:url("");
+    background-size:cover;
+    background-position:center;
+    background-attachment:fixed;
+
+    color:white;
+}
+
+/* Dark overlay */
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:rgba(10,15,30,.6);
+    z-index:-1;
+}
+
+/* Layout */
+.container{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+    min-height:calc(100vh - 40px);
+}
+
+/* Panels */
+.panel{
+    display:flex;
+    flex-direction:column;
+
+    background:rgba(255,255,255,.08);
+    backdrop-filter:blur(15px);
+    -webkit-backdrop-filter:blur(15px);
+
+    border:1px solid rgba(255,255,255,.15);
+    border-radius:10px;
+
+    box-shadow:
+        0 8px 8px rgba(0,0,0,.3);
+
+    overflow:hidden;
+}
+
+/* Header */
+.panel-header{
+    padding:20px;
+    background:rgba(255,255,255,.08);
+    border-bottom:1px solid rgba(255,255,255,.1);
+    text-align:center;
+    font-size:1.3rem;
+    font-weight:bold;
+}
+
+/* Content */
+.panel-content{
+    flex:1;
+    padding:20px;
+
+    overflow-y:auto;
+
+    scrollbar-width:thin;
+}
+
+/* Example styles for future elements */
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th,td{
+    padding:5px;
+    border:1px solid rgba(255,255,255,.1);
+}
+
+canvas,
+iframe,
+img{
+    width:100%;
+    max-width:100%;
+    border-radius:15px;
+}
+
+/* Custom scrollbar */
+.panel-content::-webkit-scrollbar{
+    width:8px;
+}
+
+.panel-content::-webkit-scrollbar-thumb{
+    background:rgba(255,255,255,.3);
+    border-radius:10px;
+}
+
+/* Tablet */
+@media (max-width:1000px){
+
+    .container{
+        grid-template-columns:1fr;
+    }
+
+    .panel{
+        min-height:500px;
+    }
+
+}
+
+/* Small phones */
+@media (max-width:600px){
+
+    body{
+        padding:10px;
+    }
+
+    .container{
+        gap:15px;
+    }
+
+    .panel{
+        min-height:400px;
+    }
+
+    .panel-header{
+        font-size:1.1rem;
+        padding:15px;
+    }
+
+    .panel-content{
+        padding:15px;
+    }
+
+}
 
   h2 {
     text-align: center;
   }
 
-  input, select, button {
-    width: 30%;
+  label {
+    display: block;
+    margin-top: 10px;
+  }
+
+  select, input {
+    width: 32%;
     padding: 6px;
     margin-top: 5px;
     border-radius: 8px;
     border: none;
-    font-size: 14px;
+    font-size: 11px;
   }
 
-  button {
+   button {
+    width: 100%;
+    padding: 6px;
+    margin-top: 5px;
+    border-radius: 8px;
+    border: none;
+    font-size: 11px;
     background: #22c55e;
     color: white;
     cursor: pointer;
-    width: 100%;
+    margin-top: 5px;
   }
 
   button:hover {
@@ -54,14 +188,16 @@
 
   table {
     width: 100%;
-    margin-top: 20px;
+    margin-top: 10px;
     border-collapse: collapse;
   }
 
   th, td {
-    padding: 8px;
+    padding: 5px;
     border-bottom: 1px solid #334155;
     text-align: center;
+    align-items: center;
+    justify-content: center;
   }
 
   th {
@@ -70,95 +206,99 @@
 
   .delete-btn {
     background: #ef4444;
-    padding: 4px 8px;
+    padding: 5px 5px;
     border-radius: 6px;
     color: white;
+    cursor: pointer;
     border: none;
   }
 
-  /* 📊 CHART LAYOUT */
-  .chart-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 5px;
+  .filters {
     margin-top: 20px;
-  }
-
-  /* 🔲 PERFECT SQUARE BOX */
-  .chart-box {
-    aspect-ratio: 1 / 1;
-    width: 100%;
-    border-radius: 10px;
     padding: 5px;
-    position: relative;
-    overflow: hidden;
+    background: #0b1220;
+    border-radius: 10px;
   }
-
-  .chart-box canvas {
-    width: 100% !important;
-    height: 100% !important;
-  }
-
-  /* 📱 MOBILE */
-  @media (max-width: 600px) {
-    .chart-row {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-
 </style>
 </head>
-
 <body>
 
 <div class="container">
-  <h2>Investment Allocation Tracker</h2>
 
-  <!-- CHARTS -->
-  <div class="chart-row">
-    <div class="chart-box">
-      <canvas id="lineChart"></canvas>
-    </div>
+    <!-- Panel 1 -->
+    <section class="panel">
 
-    <div class="chart-box">
-      <canvas id="pieChart"></canvas>
-    </div>
-  </div>
+        <div class="panel-header">
+            Funds
+        </div>
+
+        <div class="panel-content">
+
+            <!-- Place charts, tables, frames, etc. -->
+
+        </div>
+
+    </section>
+
+    <!-- Panel 2 -->
+    <section class="panel">
+
+        <div class="panel-header">
+            Savings
+        </div>
+
+        <div class="panel-content">
+
+            <!-- Place charts, tables, frames, etc. -->
+
+        </div>
+
+    </section>
+
+    <!-- Panel 3 -->
+    <section class="panel">
+
+        <div class="panel-header">
+            Investment
+        </div>
+
+        <div class="panel-content">
 
   <!-- INPUTS -->
   <input type="date" id="dateInput">
-  <input type="number" id="amountInput" placeholder="Amount (₱)">
+
+  <input type="number" id="amountInput" placeholder="Enter amount">
 
   <select id="accountInput">
-    <option>MP2 - Acc. 1</option>
-    <option>MP2 - Acc. 2</option>
-    <option>MP2 - Acc. 3</option>
-    <option>MP2 - Acc. 4</option>
-    <option>MP2 - Acc. 5</option>
-    <option>GS - TOPA1</option>
-    <option>GS - TOPA2</option>
+    <option>Select</option>
+    <option>MP2 - Account 1</option>
+    <option>MP2 - Account 2</option>
+    <option>MP2 - Account 3</option>
+    <option>MP2 - Account 4</option>
+    <option>MP2 - Account 5</option>
   </select>
+
 
   <button onclick="addEntry()">Add Entry</button>
 
   <!-- FILTERS -->
-  <h3>Filters</h3>
+  <div class="filters">
+    <h3>Filters</h3>
 
-  <input type="date" id="fromDate" onchange="renderTable()">
-  <input type="date" id="toDate" onchange="renderTable()">
+    <input type="date" id="fromDate" onchange="renderTable()">
+    <input type="date" id="toDate" onchange="renderTable()">
 
-  <select id="filterAccount" onchange="renderTable()">
-    <option value="">All Accounts</option>
-    <option>MP2 - Acc. 1</option>
-    <option>MP2 - Acc. 2</option>
-    <option>MP2 - Acc. 3</option>
-    <option>MP2 - Acc. 4</option>
-    <option>MP2 - Acc. 5</option>
-    <option>GS - TOPA1</option>
-    <option>GS - TOPA2</option>
-  </select>
+    <select id="filterAccount" onchange="renderTable()">
+      <option value="">All Accounts</option>
+      <option>MP2 - Account 1</option>
+      <option>MP2 - Account 2</option>
+      <option>MP2 - Account 3</option>
+      <option>MP2 - Account 4</option>
+      <option>MP2 - Account 5</option>
+    </select>
 
-  <button onclick="clearFilters()">Clear Filters</button>
+    <button onclick="clearFilters()">Clear Filters</button>
+  </div>
 
   <!-- TABLE -->
   <table>
@@ -174,143 +314,65 @@
   </table>
 </div>
 
+        </div>
+
+    </section>
+
+</div>
 <script>
 let data = JSON.parse(localStorage.getItem("mp2Data")) || [];
 
-let lineChart;
-let pieChart;
-
-/* ADD */
 function addEntry() {
   const date = document.getElementById("dateInput").value;
   const account = document.getElementById("accountInput").value;
-  const amount = parseFloat(document.getElementById("amountInput").value);
+  const amount = document.getElementById("amountInput").value;
 
-  if (!date || !amount) return alert("Fill date and amount");
+  if (!date || !amount) {
+    alert("Please fill in date and amount");
+    return;
+  }
 
   data.push({ date, account, amount });
-  save();
+  saveAndRender();
+
+  document.getElementById("amountInput").value = "";
 }
 
-/* SAVE */
-function save() {
-  localStorage.setItem("mp2Data", JSON.stringify(data));
-  renderTable();
-  updateCharts();
-}
-
-/* TABLE */
 function renderTable() {
   const tbody = document.getElementById("tableBody");
   tbody.innerHTML = "";
 
-  const acc = document.getElementById("filterAccount").value;
-  const from = document.getElementById("fromDate").value;
-  const to = document.getElementById("toDate").value;
+  const accountFilter = document.getElementById("filterAccount").value;
+  const fromDate = document.getElementById("fromDate").value;
+  const toDate = document.getElementById("toDate").value;
 
-  const filtered = data.filter(d =>
-    (!acc || d.account === acc) &&
-    (!from || d.date >= from) &&
-    (!to || d.date <= to)
-  );
+  const filtered = data.filter(item => {
+    const matchAccount = !accountFilter || item.account === accountFilter;
+    const matchFrom = !fromDate || item.date >= fromDate;
+    const matchTo = !toDate || item.date <= toDate;
 
-  filtered.forEach((d, i) => {
+    return matchAccount && matchFrom && matchTo;
+  });
+
+  filtered.forEach((item, index) => {
     tbody.innerHTML += `
       <tr>
-        <td>${d.date}</td>
-        <td>${d.account}</td>
-        <td>₱${d.amount.toLocaleString()}</td>
-        <td><button class="delete-btn" onclick="del(${i})">X</button></td>
+        <td>${item.date}</td>
+        <td>${item.account}</td>
+        <td>₱${parseFloat(item.amount).toLocaleString()}</td>
+        <td><button class="delete-btn" onclick="deleteEntry(${index})">X</button></td>
       </tr>
     `;
   });
+
+  localStorage.setItem("mp2Data", JSON.stringify(data));
 }
 
-/* DELETE */
-function del(i) {
-  data.splice(i, 1);
-  save();
+function deleteEntry(index) {
+  data.splice(index, 1);
+  saveAndRender();
 }
 
-/* PROJECTION */
-function buildProjection() {
-  let yearly = {};
-  let base = 0;
-
-  data.forEach(d => {
-    const year = new Date(d.date).getFullYear();
-    yearly[year] = (yearly[year] || 0) + d.amount;
-  });
-
-  Object.values(yearly).forEach(v => base += v);
-
-  let labels = [];
-  let values = [];
-
-  for (let i = 0; i < 5; i++) {
-    base *= 1.04;
-    labels.push((new Date().getFullYear() + i).toString());
-    values.push(base);
-  }
-
-  return { labels, values };
-}
-
-/* PIE */
-function buildPie() {
-  let map = {};
-
-  data.forEach(d => {
-    map[d.account] = (map[d.account] || 0) + d.amount;
-  });
-
-  return {
-    labels: Object.keys(map),
-    values: Object.values(map)
-  };
-}
-
-/* CHARTS */
-function updateCharts() {
-  const line = buildProjection();
-  const pie = buildPie();
-
-  if (lineChart) lineChart.destroy();
-  if (pieChart) pieChart.destroy();
-
-  lineChart = new Chart(document.getElementById("lineChart"), {
-    type: "line",
-    data: {
-      labels: line.labels,
-      datasets: [{
-        label: "5-Year Projected Growth",
-        data: line.values,
-        borderColor: "#22c55e",
-        fill: false
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false
-    }
-  });
-
-  pieChart = new Chart(document.getElementById("pieChart"), {
-    type: "pie",
-    data: {
-      labels: pie.labels,
-      datasets: [{
-        data: pie.values
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false
-    }
-  });
-}
-
-/* FILTER RESET */
 function clearFilters() {
   document.getElementById("filterAccount").value = "";
   document.getElementById("fromDate").value = "";
@@ -318,8 +380,12 @@ function clearFilters() {
   renderTable();
 }
 
+function saveAndRender() {
+  localStorage.setItem("mp2Data", JSON.stringify(data));
+  renderTable();
+}
+
 renderTable();
-updateCharts();
 </script>
 
 </body>
